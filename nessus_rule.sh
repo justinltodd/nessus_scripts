@@ -6,14 +6,14 @@
 # Syntax : accept|reject address/netmask
 # reject 10.42.123.0/24
 
-# You can also deny/allow certain ports :
+# You can also deny|allow certain ports :
 # Forbid connecting to port 80 for 10.0.0.1 :
 # reject 10.0.0.1:80
 # Forbid connecting to ports 8000 - 10000 for any host in the 192.168.0.0/24 subnet :
 # reject 192.168.0.0/24:8000-10000
 
 
-# You can also deny/allow the use of certain plugin IDs :
+# You can also deny|allow the use of certain plugin IDs :
 # plugin-reject 10335
 # plugin-accept 10000-40000
 
