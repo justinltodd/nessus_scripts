@@ -14,8 +14,8 @@ Example:
             [-n] [plugin ID]
             [-k] [plugin ID]
 
-./nessus_rule.sh -a 192.168.1.1/24
-./nessus_rule.sh -r 192.168.1.2/24
-./nessus_rule.sh -p 192.168.1.3/24:80 or range ./nessus_rule.sh -p 192.168.1.3/24:1000-2000
-./nessus_rule.sh -n 100
+	./nessus_rule.sh -a 192.168.1.1/24
+	./nessus_rule.sh -r 192.168.1.2/24
+	./nessus_rule.sh -p 192.168.1.3/24:80 or range ./nessus_rule.sh -p 192.168.1.3/24:1000-2000
+	./nessus_rule.sh -n 100
 
