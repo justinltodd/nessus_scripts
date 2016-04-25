@@ -35,7 +35,7 @@ fi
 # GET OPTIONS FROM COMMAND LINE [-h] help [-a] accept [-r] reject [-n] plugin-reject [-k] plugin-accept
 while getopts ":h:a:r:n:k:p:" opt; do
   case $opt in
-    h | *)
+    h)
       echo ""
       echo "Syntax : accept|reject address/netmask ie. reject 10.42.123.0/24 . 10.42.123.1/24"
       echo "Reject connecting to port 80 for 10.0.0.1 ie. reject 10.0.0.1:80"
