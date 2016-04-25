@@ -18,18 +18,21 @@
 # plugin-accept 10000-40000
 
 RULESFILE="/opt/nessus/etc/nessus/nessusd.rules"
-RULE=$1
+SYNTAX=$1
 LOG="nessus_rules.log"
 IPADRESS="accept|reject address"
 PORTS="# You can also deny|allow certain ports"
-PLUGINS="deny/allow the use of certain plugin IDs"
+PLUGINS="deny|allow the use of certain plugin IDs"
 
+
+# CHECK IF THERE IS A INPUT
 if [[ "$1" == "" ]]; then
    echo "Invalid Input: [-h] help [-r] reject [-n] plugin-reject [-k] plugin-accept"
+   exit 1
 fi
 
-echo "$1"
 
+# GET OPTIONS FROM COMMAND LINE [-h] help [-a] accept [-r] reject [-n] plugin-reject [-k] plugin-accept
 while getopts ":h:a:r:n:k:p:" opt; do
   case $opt in
     h)
@@ -47,45 +50,70 @@ while getopts ":h:a:r:n:k:p:" opt; do
       echo "[-k] [plugin ID]"
       ;;
     a)
+      # CHECK FOR IMPROPER RULE SYNTAX CHAR ":"
       if [[ $OPTARG = *[':']* ]]; then
          echo "Invalid Parameter: [IP/CIDR]"
+         exit 1
       else
+      # CHECK FOR "/" IP/CIDR FORMAT
          if [[ $OPTARG = *['/']* ]]; then
             sed -i "/$IPADRESS/a accept $OPTARG" $RULESFILE
             echo "Added accept $OPTARG to $RULESFILE " >&2
+            exit 0
          else
             echo "Missing Paremeter [IP/CIDR]"
+            exit 1
          fi
       fi
       ;;
     r)
+     # CHECK FOR IMPROPER RULE SYNTAX CHAR ":"
      if [[ $OPTARG = *[':']* ]]; then
          echo "Invalid Parameter: [IP/CIDR]"
+         exit 1
       else
-         if [[ $1 = *['/']* ]]; then
-            echo "sed -i "/$IPADDRESS/a \\reject $OPTARG" $RULESFILE"
+         # CHECK FOR "/" IP/CIDR FORMAT
+         if [[ $OPTARG = *['/']* ]]; then
+            echo "sed -i "/$IPADDRESS/a reject $OPTARG" $RULESFILE"
             echo "Added reject $OPTARG to $RULESFILE " >&2
+            exit 0
          else
             echo "Missing Paremeter [IP/CIDR]"
+            exit 1
          fi
       fi
       ;;
     n)
-      echo "-n plugin-reject Parameter: $OPTARG" >&2
-      sed -i "/$PLUGINS/a \\plugin-reject $RULE" $RULESFILE
+      # CHECK PLUGIN RULE FOR NON INTEGERS
+      if [[ $OPTARG == ?(-)+([0-9]) ]]; then
+	echo "Added plugin-reject $OPTARG to $RULESFILE" >&2
+        sed -i "/$PLUGINS/a plugin-reject $OPTARG" $RULESFILE
+        exit 0
+      else 
+	echo "Invalid Parameter: [PLUGIN-ID]. No other characters than a number/integer"
+        exit 1
+      fi
       ;;
     k)
-      echo "-k plugin-accept Parameter: $OPTARG" >&2
-      sed -i "/$PLUGINS/a \\plugin-accept $RULE" $RULESFILE
+      # CHECK PLUGIN RULE FOR NON INTEGERS 
+      if [[ $OPTARG == ?(-)+([0-9]) ]]; then
+        sed -i "/$PLUGINS/a plugin-accept $OPTARG" $RULESFILE
+        echo "Added plugin-accept $OPTARG to $RULESFILE" >&2
+        exit 0
+      else
+        echo "Invalid Parameter: [PLUGIN-ID]. No other characters than a number/integer"
+        exit 1
+      fi
       ;;
     p)
-      echo "Added reject $OPTARG to $RULESFILE" >&2
-      # Check for ":" and "/"
+      # CHECK FOR ":" and "/"
       if [[ $OPTARG = *[':']* ]] && [[ $OPTARG = *['/']* ]]; then
-         echo "1"
             sed -i "/$PORTS/a reject $OPTARG" $RULESFILE
+            echo "Added reject $OPTARG to $RULESFILE" >&2
+            exit 0
          else
             echo "Missing Parameter: [IP/CIDR:PORT] [IP/CIDR:PORT-PORT]"
+            exit 1
       fi
       ;;
     \?)
