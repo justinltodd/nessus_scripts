@@ -18,8 +18,6 @@
 # plugin-accept 10000-40000
 
 RULESFILE="/opt/nessus/etc/nessus/nessusd.rules"
-SYNTAX=$1
-LOG="nessus_rules.log"
 IPADRESS="accept|reject address"
 PORTS="# You can also deny|allow certain ports"
 PLUGINS="deny|allow the use of certain plugin IDs"
