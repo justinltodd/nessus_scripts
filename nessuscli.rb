@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 #################################################################################################
 # Name: Nessus 6 Report Downloader
+# Author: Travis Lee
+#
 # Version: 1.0
 # Last Updated: 2/28/2016
 #
@@ -23,6 +25,7 @@
 #################################################################################################
 
 require 'net/http'
+require 'base64'
 require 'fileutils'
 require 'io/console'
 require 'date'
@@ -30,7 +33,51 @@ require 'json'
 require 'openssl'
 require 'thread'
 require 'date'
+require 'uri'
 
+# This method will upload the nessus files from a specified folder
+def nessus_upload(http, headers)
+	begin
+		# create report folder
+ 		print "\nPath to upload Nessus files : "
+		upath = gets.chomp.to_s
+		unless File.directory?(upath)
+			puts "\n\nError getting upload directory\n\n"
+         	end
+		
+		upath = upath + '/*'
+		Dir[upath].each do |file_name|
+  			next if File.directory? file_name 
+			print "\n" + file_name
+			
+			# upload scan
+			puts "\n[+] Upload scan: " + file_name
+			path = "/file/upload"
+			params = {'no_enc' => 0}
+			#data = {'file' => file_name, 'folder_id' => chapters_to_dl, 'password' => db_export_pw}
+			#content = File.binread(file_name)
+			#body = Base64.encode64(content)
+			file_path = upath + '/' + file_name
+			files = { 'Filename' => file_path, 'Filedata' => File.open(file_name) }
+			resp = http.post(path, files, headers)
+			#status_results = JSON.parse(resp.body)
+			
+			#break if status_results["status"] == "ready"
+			#	puts "[-] Upload not ready yet, checking again in 5 secs."
+
+			# import scan
+			puts "\n[+] Importing scan: " + file_name
+			path = "/scans/import"
+			#data = {'file' => file_name, 'folder_id' => chapters_to_dl, 'password' => db_export_pw}
+			data = {'file' => file_name}
+			resp = http.post(path, data.to_json, headers)
+			status_results = JSON.parse(resp.body)
+			
+			break if status_results["status"] == "ready"
+				puts "[-] Import not ready yet, checking again in 5 secs."
+		end
+	end
+end
 # This method will download the specified file type from specified reports
 def report_download(http, headers, reports, reports_to_dl, filetypes_to_dl, chapters_to_dl, rpath, db_export_pw)
 	begin
@@ -163,10 +210,10 @@ puts "\nNessus 6 Report Downloader 1.0"
 # Collect server info
 print "\nEnter the Nessus Server IP: "
 nserver = gets.chomp.to_s
-print "Enter the Nessus Server Port [8834]: "
+print "Enter the Nessus Server Port [443]: "
 nserverport = gets.chomp.to_s
 if nserverport.eql?("")
-	nserverport = "8834"
+	nserverport = "443"
 end
 
 # https object
@@ -186,21 +233,25 @@ headers = get_token(http, username, password)
 # get list of reports
 puts "\n\nGetting report list..."
 reports = get_report_list(http, headers)
-print "Enter the report(s) your want to download (comma separate list) or 'all' or 'five': "
+print "Enter the report(s) your want to download (comma separate list) or 'all' or 'five' or 'upload': "
 reports_to_dl = (gets.chomp.to_s).split(",")
 
 if reports_to_dl.count == 0
 	puts "\nError! You need to choose at least one report!\n\n"
 	exit
+elsif reports_to_dl[0].eql?("upload") 
+	nessus_upload(http, headers)
+	exit	
 end
 
 # select file types to download
 puts "\nChoose File Type(s) to Download: "
 puts "[0] Nessus (No chapter selection)"
 puts "[1] HTML"
-puts "[2] CSV (No chapter selection)"
-puts "[3] DB (No chapter selection)"
-#puts "[4] DB (No chapter selection)"
+puts "[2] PDF"
+puts "[3] CSV (No chapter selection)"
+#puts "[3] DB (No chapter selection)"
+puts "[4] DB (No chapter selection)"
 print "Enter the file type(s) you want to download (comma separate list) or 'all': "
 filetypes_to_dl = (gets.chomp.to_s).split(",")
 
@@ -229,13 +280,13 @@ filetypes_to_dl.each do |ft|
 	  formats.push("html")
   	  cSelect = true
 	when "2"
-	  #formats.push("pdf")
-	  #cSelect = true
-	  formats.push("csv")
+	  formats.push("pdf")
+	  cSelect = true
 	when "3"
+	  formats.push("csv")
+	when "4"
 	  formats.push("db")
 	  dbSelect = true
-	#when "4"
 	end
 end
 
