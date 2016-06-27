@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #################################################################################################
 # Name: Nessus 6 Report Downloader
-# Author: Travis Lee
+# 
 #
 # Version: 1.0
 # Last Updated: 2/28/2016
