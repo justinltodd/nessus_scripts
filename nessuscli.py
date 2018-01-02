@@ -2,7 +2,7 @@
 
 ######################################
 #
-# CLEARDATA NETWORKS
+# 
 # CREATED BY JUSTIN TODD
 # NESSUS API (XMLRPC) INTERACTION
 # DATE: 04/28/2016
