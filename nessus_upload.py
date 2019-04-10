@@ -8,8 +8,8 @@ url = 'https://54.152.179.95'
 #url = 'https://cloud.tenable.com/nessus6.html#/'
 verify = False
 token = ''
-username = 'justin.todd@cleardata.com'
-password = 'P@ssw0rd123'
+username = ''
+password = ''
 
 
 def build_url(resource):
